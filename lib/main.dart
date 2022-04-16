@@ -179,13 +179,7 @@ class _AuthPageState extends State<AuthPage> {
                   top: 42,
                   right: 0,
                   left: 0,
-                  child: Text(
-                    'x',
-                    style: TextStyle(
-                      fontSize: 32,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
+                  child: Icon(Icons.favorite, color: Colors.red),
                 ),
                 const Positioned(
                   top: 32,
@@ -234,7 +228,7 @@ class _AuthPageState extends State<AuthPage> {
 
                 router.goNamed('ListGroupPage');
               },
-              child: const Text('Masuk'),
+              child: const Text('Sign in anonymously'),
             ),
           ),
         ],
@@ -312,9 +306,13 @@ class _ListGroupPageState extends State<ListGroupPage> {
       realtime = Realtime(sdk!);
       subscription = realtime.subscribe(['collections.$groupsId.documents'])
         ..stream.listen((event) {
-          setState(() {
-            groups.add(Group.fromJson(event.payload));
-          });
+          if(event.event == 'database.documents.create'){
+            final group = Group.fromJson(event.payload);
+            setState(() {
+              groups.add(group);
+            });
+          }
+
         });
     }
 
@@ -512,9 +510,15 @@ class _ChatsGroupPageState extends State<ChatsGroupPage> {
       realtime = Realtime(sdk!);
       subscription = realtime.subscribe(['collections.$chatsId.documents'])
         ..stream.listen((event) {
-          setState(() {
-            chats.add(Chat.fromJson(event.payload));
-          });
+          if(event.event == 'database.documents.create'){
+            final chat = Chat.fromJson(event.payload);
+            if(chat.groupId == widget.groupId){
+              setState(() {
+                chats.add(chat);
+              });
+            }
+          }
+
         });
     }
 
