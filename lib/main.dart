@@ -20,42 +20,41 @@ class NavigationHelper {
     urlPathStrategy: UrlPathStrategy.path,
     routes: <GoRoute>[
       GoRoute(
-          path: '/',
-          name: 'AuthPage',
+        path: '/',
+        name: 'AuthPage',
+        builder: (BuildContext context, GoRouterState state) =>
+            const AuthPage(),
+        redirect: (state) {
+          if (isLoggedIn) {
+            return '/groups';
+          }
+          return null;
+        },
+      ),
+      GoRoute(
+          path: '/groups',
+          name: 'ListGroupPage',
           builder: (BuildContext context, GoRouterState state) =>
-              const AuthPage(),
+              const ListGroupPage(),
           redirect: (state) {
-            if (isLoggedIn) {
-              return '/groups';
+            if (!isLoggedIn) {
+              return '/';
             }
             return null;
           },
           routes: [
             GoRoute(
-                path: 'groups',
-                name: 'ListGroupPage',
-                builder: (BuildContext context, GoRouterState state) =>
-                    const ListGroupPage(),
-                redirect: (state) {
-                  if (!isLoggedIn) {
-                    return '/';
-                  }
-                  return null;
-                },
-                routes: [
-                  GoRoute(
-                    path: ':id',
-                    name: 'ChatsGroupPage',
-                    builder: (BuildContext context, GoRouterState state) =>
-                        ChatsGroupPage(groupId: state.params['id']!),
-                    redirect: (state) {
-                      if (!isLoggedIn) {
-                        return '/';
-                      }
-                      return null;
-                    },
-                  ),
-                ]),
+              path: ':id',
+              name: 'ChatsGroupPage',
+              builder: (BuildContext context, GoRouterState state) =>
+                  ChatsGroupPage(groupId: state.params['id']!),
+              redirect: (state) {
+                if (!isLoggedIn) {
+                  return '/';
+                }
+                return null;
+              },
+            ),
           ]),
     ],
   );
@@ -415,7 +414,7 @@ class _ListGroupPageState extends State<ListGroupPage> {
               onTap: () {
                 final router = NavigationProvider.of(context).helper.router;
 
-                router.pushNamed('ChatsGroupPage', params: {
+                router.goNamed('ChatsGroupPage', params: {
                   'id': groups[index].id,
                 });
               },
