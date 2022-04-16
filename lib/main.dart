@@ -378,7 +378,7 @@ class _ListGroupPageState extends State<ListGroupPage> {
                               onPressed: () {
                                 Navigator.pop(context);
                               },
-                              child: const Text('Tutup'),
+                              child: const Text('Close'),
                             ),
                             const SizedBox(width: 16),
                             ElevatedButton(
@@ -390,7 +390,7 @@ class _ListGroupPageState extends State<ListGroupPage> {
                                 _createGroup(controller.text);
                                 Navigator.pop(context);
                               },
-                              child: const Text('Tambah'),
+                              child: const Text('Add'),
                             ),
                           ],
                         ),
@@ -542,7 +542,7 @@ class _ChatsGroupPageState extends State<ChatsGroupPage> {
                   focusNode: focusNode,
                   controller: controller,
                   decoration: const InputDecoration(
-                    hintText: 'Katakan sesuatu...',
+                    hintText: 'Say something...',
                   ),
                   onSubmitted: (value) async {
                     _createChat(value);
@@ -554,7 +554,7 @@ class _ChatsGroupPageState extends State<ChatsGroupPage> {
               onPressed: () {
                 _createChat(controller.text);
               },
-              child: const Text('Kirim'),
+              child: const Text('Send'),
             ),
           ],
         ),
