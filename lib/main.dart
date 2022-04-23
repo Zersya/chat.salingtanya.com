@@ -277,6 +277,13 @@ class _ListGroupPageState extends State<ListGroupPage> {
   @override
   void initState() {
     super.initState();
+
+    WidgetsBinding.instance?.addPostFrameCallback((_) async {
+      await Future.delayed(const Duration(milliseconds: 250));
+      if (groups.isNotEmpty) {
+        _scrollToBottom();
+      }
+    });
   }
 
   @override
@@ -306,13 +313,12 @@ class _ListGroupPageState extends State<ListGroupPage> {
       realtime = Realtime(sdk!);
       subscription = realtime.subscribe(['collections.$groupsId.documents'])
         ..stream.listen((event) {
-          if(event.event == 'database.documents.create'){
+          if (event.event == 'database.documents.create') {
             final group = Group.fromJson(event.payload);
             setState(() {
               groups.add(group);
             });
           }
-
         });
     }
 
@@ -403,21 +409,23 @@ class _ListGroupPageState extends State<ListGroupPage> {
           color: Colors.white,
         ),
       ),
-      body: ListView.builder(
-          controller: scrollController,
-          itemCount: groups.length,
-          itemBuilder: (context, index) {
-            return ListTile(
-              title: Text(groups[index].name),
-              onTap: () {
-                final router = NavigationProvider.of(context).helper.router;
+      body: groups.isEmpty
+          ? const Center(child: Text('No chats'))
+          : ListView.builder(
+              controller: scrollController,
+              itemCount: groups.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(groups[index].name),
+                  onTap: () {
+                    final router = NavigationProvider.of(context).helper.router;
 
-                router.goNamed('ChatsGroupPage', params: {
-                  'id': groups[index].id,
-                });
-              },
-            );
-          }),
+                    router.goNamed('ChatsGroupPage', params: {
+                      'id': groups[index].id,
+                    });
+                  },
+                );
+              }),
     );
   }
 }
@@ -468,17 +476,24 @@ class _ChatsGroupPageState extends State<ChatsGroupPage> {
     focusNode.requestFocus();
   }
 
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance?.addPostFrameCallback((_) async {
+      await Future.delayed(const Duration(milliseconds: 250));
+      if (chats.isNotEmpty) {
+        _scrollToBottom();
+      }
+    });
+  }
+
   _scrollToBottom() {
     scrollController.animateTo(
       scrollController.position.maxScrollExtent,
       duration: const Duration(milliseconds: 150),
       curve: Curves.easeOut,
     );
-  }
-
-  @override
-  void initState() {
-    super.initState();
   }
 
   @override
@@ -510,15 +525,14 @@ class _ChatsGroupPageState extends State<ChatsGroupPage> {
       realtime = Realtime(sdk!);
       subscription = realtime.subscribe(['collections.$chatsId.documents'])
         ..stream.listen((event) {
-          if(event.event == 'database.documents.create'){
+          if (event.event == 'database.documents.create') {
             final chat = Chat.fromJson(event.payload);
-            if(chat.groupId == widget.groupId){
+            if (chat.groupId == widget.groupId) {
               setState(() {
                 chats.add(chat);
               });
             }
           }
-
         });
     }
 
@@ -563,33 +577,35 @@ class _ChatsGroupPageState extends State<ChatsGroupPage> {
           ],
         ),
       ),
-      body: ListView.builder(
-          controller: scrollController,
-          itemCount: chats.length,
-          itemBuilder: (context, index) {
-            final chat = chats[index];
-            final createdBy = chats[index].write.first;
-            final avatarSeed = createdBy.substring(0, 5) +
-                createdBy.substring(createdBy.length - 4);
-            return ListTile(
-              leading: CircleAvatar(
-                backgroundColor: Colors.white,
-                child: Image.network(
-                  'https://avatars.dicebear.com/api/adventurer/$avatarSeed.png',
-                ),
-              ),
-              trailing: Text(
-                formatter
-                    .format(
-                      DateTime.fromMillisecondsSinceEpoch(
-                        chat.createdAt,
-                      ),
-                    )
-                    .toString(),
-              ),
-              title: SelectableText(chat.content),
-            );
-          }),
+      body: chats.isEmpty
+          ? const Center(child: Text('No chats'))
+          : ListView.builder(
+              controller: scrollController,
+              itemCount: chats.length,
+              itemBuilder: (context, index) {
+                final chat = chats[index];
+                final createdBy = chats[index].write.first;
+                final avatarSeed = createdBy.substring(0, 5) +
+                    createdBy.substring(createdBy.length - 4);
+                return ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: Colors.white,
+                    child: Image.network(
+                      'https://avatars.dicebear.com/api/adventurer/$avatarSeed.png',
+                    ),
+                  ),
+                  trailing: Text(
+                    formatter
+                        .format(
+                          DateTime.fromMillisecondsSinceEpoch(
+                            chat.createdAt,
+                          ),
+                        )
+                        .toString(),
+                  ),
+                  title: SelectableText(chat.content),
+                );
+              }),
     );
   }
 }
